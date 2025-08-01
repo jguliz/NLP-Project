@@ -91,7 +91,7 @@ class RatingLexiconSearch:
         filtered_results = []
         for review_id in combined_results:
             review = self.df[self.df['review_id'] == review_id].iloc[0]
-            rating = review['star_rating']
+            rating = review['customer_review_rating']
             
             if polarity == 'positive' and rating > 3:
                 filtered_results.append(review_id)
@@ -159,7 +159,7 @@ class RatingLexiconSearch:
             for review_id in expanded_results:
                 if review_id not in results:
                     review = self.df[self.df['review_id'] == review_id].iloc[0]
-                    rating = review['star_rating']
+                    rating = review['customer_review_rating']
                     
                     if polarity == 'positive' and rating > 3:
                         results.append(review_id)

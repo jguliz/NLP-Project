@@ -62,6 +62,11 @@ class DataPreprocessor:
         """Preprocess all reviews"""
         print("Preprocessing reviews...")
         
+        # Ensure we have the rating column as numeric
+        if 'customer_review_rating' in self.df.columns:
+            self.df['customer_review_rating'] = pd.to_numeric(self.df['customer_review_rating'], errors='coerce')
+            print(f"Rating distribution: {self.df['customer_review_rating'].value_counts().sort_index().to_dict()}")
+        
         # Clean review text
         self.df['cleaned_text'] = self.df['review_text'].apply(self.clean_text)
         

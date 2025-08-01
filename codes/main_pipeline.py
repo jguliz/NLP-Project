@@ -7,7 +7,7 @@ import pandas as pd
 from data_preprocessing import DataPreprocessor
 from baseline_boolean import BaselineBooleanSearch
 from method1_rating_lexicon import RatingLexiconSearch
-from method2_semantic import SemanticOpinionSearch
+from method2_semantic_simple import SimplifiedSemanticSearch
 
 def create_output_directories():
     """Create necessary output directories"""
@@ -166,7 +166,7 @@ def main():
     
     # Step 5: Run Method 2 - Semantic Search
     print("\nStep 4: Running Method 2 (Semantic Search)...")
-    method2_searcher = SemanticOpinionSearch()
+    method2_searcher = SimplifiedSemanticSearch()
     method2_eval = evaluate_results("Method 2", test_queries, method2_searcher)
     
     # Save Method 2 results (these go to advanced_models folder for final submission)
