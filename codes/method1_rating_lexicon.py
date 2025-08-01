@@ -1,4 +1,5 @@
 import pickle
+import os
 import pandas as pd
 from collections import defaultdict
 
@@ -19,28 +20,32 @@ class RatingLexiconSearch:
         
         print("Data and lexicons loaded successfully!")
     
+    def load_opinion_lexicon(self, filepath):
+        """Load opinion words from file"""
+        words = set()
+        
+        if not os.path.exists(filepath):
+            print(f"Warning: {filepath} not found, using basic word list")
+            return words
+        
+        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith(';'):
+                    words.add(line.lower())
+        
+        print(f"Loaded {len(words)} words from {filepath}")
+        return words
+
     def load_positive_lexicon(self):
-        """Load positive opinion words - expand this with full lexicon"""
-        # Basic positive words - you should load from the actual lexicon file
-        return set([
-            'good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic',
-            'perfect', 'love', 'best', 'awesome', 'nice', 'super', 'brilliant',
-            'outstanding', 'superior', 'exceptional', 'magnificent', 'terrific',
-            'useful', 'helpful', 'strong', 'sharp', 'clear', 'fast', 'reliable',
-            'solid', 'sturdy', 'efficient', 'effective', 'convenient', 'comfortable',
-            'positive_emoji'  # From preprocessing
-        ])
+        """Load positive opinion words"""
+        file_words = self.load_opinion_lexicon('positive-words.txt')
+        return file_words
     
     def load_negative_lexicon(self):
-        """Load negative opinion words - expand this with full lexicon"""
-        # Basic negative words - you should load from the actual lexicon file
-        return set([
-            'bad', 'poor', 'terrible', 'awful', 'horrible', 'worst', 'hate',
-            'disappointing', 'useless', 'broken', 'defective', 'weak', 'slow',
-            'unreliable', 'uncomfortable', 'inconvenient', 'difficult', 'hard',
-            'problem', 'issue', 'fail', 'failed', 'failure', 'error', 'wrong',
-            'negative_emoji'  # From preprocessing
-        ])
+        """Load negative opinion words"""
+        file_words = self.load_opinion_lexicon('negative-words.txt')
+        return file_words
     
     def get_opinion_polarity(self, opinion_terms):
         """Determine if opinion terms are positive or negative"""
