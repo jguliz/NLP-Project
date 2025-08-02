@@ -74,25 +74,20 @@ class RatingLexiconSearch:
         """Search combining boolean search with rating filtering"""
         aspect_terms, opinion_terms = self.parse_query(query)
         
-        # Determine opinion polarity
         polarity = self.get_opinion_polarity(opinion_terms)
         
-        # Get reviews containing aspect terms
         aspect_results = set()
         for term in aspect_terms:
             if term in self.inverted_index:
                 aspect_results.update(self.inverted_index[term])
         
-        # Get reviews containing opinion terms
         opinion_results = set()
         for term in opinion_terms:
             if term in self.inverted_index:
                 opinion_results.update(self.inverted_index[term])
         
-        # Intersection of aspect and opinion
         combined_results = aspect_results.intersection(opinion_results)
         
-        # Filter by rating based on polarity
         filtered_results = []
         for review_id in combined_results:
             review = self.df[self.df['review_id'] == review_id].iloc[0]
@@ -103,7 +98,6 @@ class RatingLexiconSearch:
             elif polarity == 'negative' and rating <= 3:
                 filtered_results.append(review_id)
             elif polarity == 'neutral':
-                # Include all ratings for neutral opinions
                 filtered_results.append(review_id)
         
         return filtered_results
@@ -112,13 +106,10 @@ class RatingLexiconSearch:
         """Search with expanded opinion terms based on lexicon"""
         aspect_terms, opinion_terms = self.parse_query(query)
         
-        # Expand opinion terms with synonyms from lexicon
         expanded_opinions = set(opinion_terms)
         
-        # Add related positive/negative words based on polarity
         polarity = self.get_opinion_polarity(opinion_terms)
         if polarity == 'positive':
-            # Add some related positive terms
             if 'good' in opinion_terms:
                 expanded_opinions.update(['great', 'excellent', 'nice'])
             if 'strong' in opinion_terms:
@@ -128,36 +119,29 @@ class RatingLexiconSearch:
             if 'sharp' in opinion_terms:
                 expanded_opinions.update(['clear', 'crisp', 'precise'])
         elif polarity == 'negative':
-            # Add some related negative terms
             if 'poor' in opinion_terms:
                 expanded_opinions.update(['bad', 'terrible', 'awful'])
             if 'problem' in opinion_terms:
                 expanded_opinions.update(['issue', 'fail', 'error'])
         
-        # Get reviews containing aspect terms
         aspect_results = set()
         for term in aspect_terms:
             if term in self.inverted_index:
                 aspect_results.update(self.inverted_index[term])
         
-        # Get reviews containing expanded opinion terms
         opinion_results = set()
         for term in expanded_opinions:
             if term in self.inverted_index:
                 opinion_results.update(self.inverted_index[term])
         
-        # Return intersection
         return list(aspect_results.intersection(opinion_results))
     
     def search_test4(self, query):
         """Test 4: Proper connotation - combine rating and lexicon approaches"""
-        # Use rating-based filtering as primary method
         results = self.search_with_rating(query)
         
-        # If too few results, try expanded opinion search
         if len(results) < 10:
             expanded_results = self.search_with_expanded_opinion(query)
-            # Add new results that match the rating criteria
             aspect_terms, opinion_terms = self.parse_query(query)
             polarity = self.get_opinion_polarity(opinion_terms)
             
@@ -198,7 +182,6 @@ if __name__ == "__main__":
     for query in test_queries:
         query_name = query.replace(" ", "_").replace(":", "_")
         
-        # Run Method 1 search
         results = searcher.search_test4(query)
         searcher.save_results(results, f"outputs/method1/{query_name}_test4.txt")
         

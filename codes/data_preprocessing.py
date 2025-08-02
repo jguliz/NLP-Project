@@ -14,7 +14,6 @@ class DataPreprocessor:
         
     def load_stop_words(self):
         """Load common stop words - you can expand this list"""
-        # Basic stop words list - you should download the full list from the GitHub link
         return set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
                     'of', 'with', 'by', 'from', 'up', 'about', 'into', 'through', 'during',
                     'before', 'after', 'above', 'below', 'between', 'under', 'again',
@@ -27,8 +26,6 @@ class DataPreprocessor:
         self.df = pd.read_pickle(self.data_path)
         print(f"Loaded {len(self.df)} reviews")
         
-        # Assuming the columns based on the SQL structure mentioned
-        # You may need to adjust column names based on actual data
         print("Columns:", self.df.columns.tolist())
         return self.df
     
@@ -37,19 +34,15 @@ class DataPreprocessor:
         if pd.isna(text):
             return ""
         
-        # Convert to lowercase
         text = str(text).lower()
         
-        # Handle emoticons
         text = re.sub(r':\)', ' positive_emoji ', text)
         text = re.sub(r':-\)', ' positive_emoji ', text)
         text = re.sub(r':\(', ' negative_emoji ', text)
         text = re.sub(r':-\(', ' negative_emoji ', text)
         
-        # Keep only alphanumeric and spaces
         text = re.sub(r'[^a-zA-Z0-9\s_]', ' ', text)
         
-        # Remove extra spaces
         text = ' '.join(text.split())
         
         return text
@@ -62,27 +55,21 @@ class DataPreprocessor:
         """Preprocess all reviews"""
         print("Preprocessing reviews...")
         
-        # Ensure we have the rating column as numeric
         if 'customer_review_rating' in self.df.columns:
             self.df['customer_review_rating'] = pd.to_numeric(self.df['customer_review_rating'], errors='coerce')
             print(f"Rating distribution: {self.df['customer_review_rating'].value_counts().sort_index().to_dict()}")
         
-        # Clean review text
         self.df['cleaned_text'] = self.df['review_text'].apply(self.clean_text)
         
-        # Tokenize
         self.df['tokens'] = self.df['cleaned_text'].apply(self.tokenize)
         
-        # Filter rare words (appearing less than 5 times)
         word_freq = defaultdict(int)
         for tokens in self.df['tokens']:
             for token in tokens:
                 word_freq[token] += 1
         
-        # Keep only words that appear at least 5 times
         self.valid_words = {word for word, freq in word_freq.items() if freq >= 5}
         
-        # Filter tokens
         self.df['filtered_tokens'] = self.df['tokens'].apply(
             lambda tokens: [t for t in tokens if t in self.valid_words and t not in self.stop_words]
         )

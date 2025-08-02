@@ -46,16 +46,13 @@ class PrecisionEvaluator:
                 elif response == 'n':
                     break
                 elif response == 'q':
-                    # Calculate precision up to this point
                     if i > 0:
                         precision = relevant_count / (i + 1)
                         print(f"\nPartial precision: {precision:.3f} ({relevant_count}/{i+1})")
                     return
             
-        # Calculate final precision
         precision = relevant_count / len(sampled_ids)
         
-        # Extrapolate if sampled
         if len(review_ids) > sample_size:
             print(f"\nSampled precision: {precision:.3f} ({relevant_count}/{sample_size})")
             estimated_relevant = int(precision * len(review_ids))
@@ -65,11 +62,9 @@ class PrecisionEvaluator:
             
         return precision, relevant_count, len(sampled_ids)
 
-# Usage
 if __name__ == "__main__":
     evaluator = PrecisionEvaluator()
     
-    # Evaluate baseline method (test2)
     queries = [
         "audio quality:poor",
         "wifi signal:strong",
@@ -81,7 +76,6 @@ if __name__ == "__main__":
     for query in queries:
         query_name = query.replace(" ", "_").replace(":", "_")
         
-        # Evaluate baseline
         print("\n" + "="*50)
         print("BASELINE EVALUATION")
         evaluator.evaluate_results(

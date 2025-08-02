@@ -100,21 +100,18 @@ def generate_evaluation_table(baseline_results, method1_results, method2_results
         "gps map:useful",
         "image quality:sharp"
     ]
-    
-    # Create table header
+
     print(f"{'Query':<30} | {'Baseline (Boolean)':<30} | {'Method 1 (M1)':<30} | {'Method 2 (M2)':<30}")
     print(f"{'':<30} | {'# Ret. # Rel. Prec.':<30} | {'# Ret. # Rel. Prec.':<30} | {'# Ret. # Rel. Prec.':<30}")
     print("-"*130)
     
-    # Note: In a real implementation, you would need ground truth to calculate # Rel. and Precision
-    # Here we're showing the structure
+
     for query in queries:
         baseline_ret = baseline_results[baseline_results['Query'] == query]['Test2_Retrieved'].values[0]
         method1_ret = method1_results[method1_results['Query'] == query]['Test4_Retrieved'].values[0]
         method2_ret = method2_results[method2_results['Query'] == query]['Test4_Retrieved'].values[0]
         
-        # Placeholder values for relevant docs and precision
-        # In practice, you'd calculate these against ground truth
+
         print(f"{query:<30} | {baseline_ret:<6} {'?':<6} {'?':<6} | {method1_ret:<6} {'?':<6} {'?':<6} | {method2_ret:<6} {'?':<6} {'?':<6}")
     
     print("\nNote: '?' indicates values that require ground truth labels to calculate")
@@ -124,10 +121,9 @@ def main():
     print("Starting NLP Opinion Search Engine Pipeline")
     print("="*50)
     
-    # Step 1: Create output directories
     create_output_directories()
     
-    # Step 2: Preprocess data (only if not already done)
+
     if not os.path.exists('preprocessed_data.pkl'):
         print("\nStep 1: Preprocessing data...")
         preprocessor = DataPreprocessor('reviews_segment.pkl')
@@ -138,7 +134,6 @@ def main():
     else:
         print("\nPreprocessed data already exists, skipping preprocessing...")
     
-    # Define test queries
     test_queries = [
         "audio quality:poor",
         "wifi signal:strong",
@@ -147,38 +142,31 @@ def main():
         "image quality:sharp"
     ]
     
-    # Step 3: Run Baseline Boolean Search
     print("\nStep 2: Running Baseline Boolean Search...")
     baseline_searcher = BaselineBooleanSearch()
     baseline_results = run_baseline_searches(baseline_searcher, test_queries)
     baseline_eval = evaluate_results("Baseline", test_queries, baseline_searcher)
     
-    # Step 4: Run Method 1 - Rating + Lexicon
     print("\nStep 3: Running Method 1 (Rating + Lexicon)...")
     method1_searcher = RatingLexiconSearch()
     method1_eval = evaluate_results("Method 1", test_queries, method1_searcher)
     
-    # Save Method 1 results
     for query in test_queries:
         query_name = query.replace(" ", "_").replace(":", "_")
         results = method1_searcher.search_test4(query)
         method1_searcher.save_results(results, f"outputs/method1/{query_name}_test4.txt")
     
-    # Step 5: Run Method 2 - Semantic Search
     print("\nStep 4: Running Method 2 (Semantic Search)...")
     method2_searcher = SimplifiedSemanticSearch()
     method2_eval = evaluate_results("Method 2", test_queries, method2_searcher)
     
-    # Save Method 2 results (these go to advanced_models folder for final submission)
     for query in test_queries:
         query_name = query.replace(" ", "_").replace(":", "_")
         results = method2_searcher.search_test4(query)
         method2_searcher.save_results(results, f"outputs/advanced_models/{query_name}_test4.txt")
     
-    # Step 6: Generate evaluation table
     generate_evaluation_table(baseline_eval, method1_eval, method2_eval)
     
-    # Step 7: Summary statistics
     print("\n" + "="*50)
     print("SUMMARY STATISTICS")
     print("="*50)

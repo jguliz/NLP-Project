@@ -23,14 +23,11 @@ class SimplifiedSemanticSearch:
         self.df = data['df']
         self.inverted_index = data['inverted_index']
         
-        # Create a mapping from review_id to index for faster lookup
         self.review_id_to_idx = {rid: idx for idx, rid in enumerate(self.df['review_id'])}
         
-        # Load sentence transformer model
         print(f"Loading sentence transformer model: {model_name}")
         self.model = SentenceTransformer(model_name)
         
-        # Opinion lexicons
         self.positive_words = self.load_positive_lexicon()
         self.negative_words = self.load_negative_lexicon()
         
@@ -115,7 +112,6 @@ class SimplifiedSemanticSearch:
         """Simplified semantic search"""
         aspect_terms, opinion_terms = self.parse_query(query)
         
-        # Get candidate reviews containing aspect terms
         aspect_reviews = set()
         for term in aspect_terms:
             if term in self.inverted_index:
@@ -124,13 +120,11 @@ class SimplifiedSemanticSearch:
         if not aspect_reviews:
             return []
         
-        # Determine expected polarity
         expected_polarity = self.get_opinion_polarity(opinion_terms)
         
-        # Score each candidate review
         scored_reviews = []
         
-        for review_id in list(aspect_reviews)[:1000]:  # Limit to prevent memory issues
+        for review_id in list(aspect_reviews)[:1000]: 
             # Get review by ID
             if review_id not in self.review_id_to_idx:
                 continue
@@ -138,21 +132,16 @@ class SimplifiedSemanticSearch:
             idx = self.review_id_to_idx[review_id]
             review = self.df.iloc[idx]
             
-            # Get review text
             review_text = str(review.get('review_text', '')).lower()
             if not review_text:
                 continue
             
-            # Basic scoring based on term presence
             score = 0
             
-            # Check if aspect terms are present
             aspect_score = sum(1 for term in aspect_terms if term in review_text.split())
             
-            # Check if opinion terms are present
             opinion_score = sum(1 for term in opinion_terms if term in review_text.split())
             
-            # Rating consistency check
             rating = review.get('customer_review_rating', 3)
             rating_score = 0
             
@@ -163,13 +152,11 @@ class SimplifiedSemanticSearch:
             elif expected_polarity == 'neutral':
                 rating_score = 0.5
             
-            # Combine scores
             total_score = aspect_score + opinion_score + rating_score
             
             if total_score > 0:
                 scored_reviews.append((review_id, total_score))
         
-        # Sort by score and return top results
         scored_reviews.sort(key=lambda x: x[1], reverse=True)
         
         return [review_id for review_id, score in scored_reviews[:top_k]]
@@ -185,7 +172,6 @@ class SimplifiedSemanticSearch:
                 f.write(f"{review_id}\n")
         print(f"Saved {len(results)} results to {output_file}")
 
-# Usage
 if __name__ == "__main__":
     searcher = SimplifiedSemanticSearch()
     
@@ -203,7 +189,6 @@ if __name__ == "__main__":
     for query in test_queries:
         query_name = query.replace(" ", "_").replace(":", "_")
         
-        # Run simplified search
         results = searcher.search_test4(query)
         searcher.save_results(results, f"outputs/advanced_models/{query_name}_test4.txt")
         

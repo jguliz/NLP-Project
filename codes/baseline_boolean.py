@@ -27,10 +27,8 @@ class BaselineBooleanSearch:
     
     def word_search(self, word):
         """Search for exact word matches (not substrings)"""
-        # Use word boundaries to avoid substring matches
         results = set()
         
-        # Check if word exists in inverted index
         if word in self.inverted_index:
             results.update(self.inverted_index[word])
         
@@ -47,7 +45,6 @@ class BaselineBooleanSearch:
         aspect_terms, opinion_terms = self.parse_query(query)
         
         if search_type == 'or_and':
-            # (aspect1 OR aspect2) AND (opinion1 OR opinion2)
             aspect_results = set()
             for term in aspect_terms:
                 aspect_results.update(self.word_search(term))
@@ -56,14 +53,12 @@ class BaselineBooleanSearch:
             for term in opinion_terms:
                 opinion_results.update(self.word_search(term))
             
-            # Return intersection (AND)
             if aspect_results and opinion_results:
                 return aspect_results.intersection(opinion_results)
             else:
                 return set()
         
         elif search_type == 'and_or':
-            # (aspect1 AND opinion1) OR (aspect1 AND opinion2) OR ...
             all_results = set()
             
             for aspect in aspect_terms:
@@ -76,7 +71,6 @@ class BaselineBooleanSearch:
             return all_results
         
         elif search_type == 'any':
-            # Any term matches
             all_results = set()
             all_terms = aspect_terms + opinion_terms
             
@@ -122,12 +116,9 @@ class BaselineBooleanSearch:
         precision = relevant_retrieved / len(retrieved)
         return precision
 
-# Usage
 if __name__ == "__main__":
-    # Initialize search engine
     searcher = BaselineBooleanSearch()
     
-    # Test queries
     test_queries = [
         "audio quality:poor",
         "wifi signal:strong",
@@ -136,23 +127,18 @@ if __name__ == "__main__":
         "image quality:sharp"
     ]
     
-    # Create output directories
     import os
     os.makedirs("outputs/baseline", exist_ok=True)
     
-    # Run searches for all test types
     for query in test_queries:
         query_name = query.replace(" ", "_").replace(":", "_")
         
-        # Test 1: Aspect only
         results_test1 = searcher.search_test1(query)
         searcher.save_results(results_test1, f"outputs/baseline/{query_name}_test1.txt")
         
-        # Test 2: Aspect AND Opinion
         results_test2 = searcher.search_test2(query)
         searcher.save_results(results_test2, f"outputs/baseline/{query_name}_test2.txt")
         
-        # Test 3: Aspect OR Opinion
         results_test3 = searcher.search_test3(query)
         searcher.save_results(results_test3, f"outputs/baseline/{query_name}_test3.txt")
         
